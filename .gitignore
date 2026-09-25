@@ -1,0 +1,19 @@
+# Data (keep small samples, ignore bulky raw files)
+data/raw/*
+data/processed/*
+data/external/*
+!data/**/.gitkeep
+
+# Environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Secrets
+.env
+
+# OS
+.DS_Store
+Thumbs.db
