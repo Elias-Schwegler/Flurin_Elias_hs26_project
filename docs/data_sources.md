@@ -118,6 +118,16 @@ Explanatory variables, denominators, spatial context or outcome measures.
 
 ---
 
+## Validated PV-specific sources (for the PV-potential project)
+
+- BFE Solarenergiepotenziale der Schweizer Gemeinden (CSV/JSON/XLS, per-municipality rooftop+facade potential): https://www.bfe-ogd.ch/ogd52/Solarenergiepotenziale_Gemeinden_Daecher_und_Fassaden.csv
+- BFE solar irradiation maps, 30°/75°/90° tilt (GPKG/WMS/WMTS): https://opendata.swiss/de/dataset/solare-einstrahlung-auf-eine-30-nach-suden-geneigte-flache
+- CH-POA300 hourly plane-of-array irradiance, 300 m, 2004–2020 + 2016 (EnviDat, attribution): https://doi.org/10.16904/ENVIDAT.632
+- pvlib-python (BSD-3) irradiance → PV output: https://pvlib-python.readthedocs.io
+- Swissgrid grid data (validation): https://www.swissgrid.ch/en/home/operation/grid-data.html
+
+See `project_proposals.md` for scope and processability notes.
+
 ## Candidate project directions (energy × SDG)
 - **SDG 7 (Affordable & Clean Energy):** renewable potential vs. demand at municipality level (MeteoSwiss/NASA POWER + swisstopo + ElCom tariffs).
 - **SDG 11 (Sustainable Cities):** building heating mix vs. building age (Building Register + OGD Zurich + EUROSTAT).
