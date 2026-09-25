@@ -10,9 +10,8 @@
 
 | Name | Major task |
 |--------|------------|
-| Student 1 |     Elias Schwegler       |
-| Student 2 |     Flurin Yenigün        |
-| Student 3 |            |
+| Elias Schwegler | TBD — data sourcing / modelling |
+| Flurin Yenigün | TBD — analysis / visualisation |
 
 
 ### Project Name
