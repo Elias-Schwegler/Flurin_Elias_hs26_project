@@ -10,8 +10,8 @@
 
 | Name | Major task |
 |--------|------------|
-| Student 1 |            |
-| Student 2 |            |
+| Student 1 |     Elias Schwegler       |
+| Student 2 |     Flurin Yenigün        |
 | Student 3 |            |
 
 
