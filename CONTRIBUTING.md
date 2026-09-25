@@ -7,7 +7,7 @@ Workflow proposed by the lecturer in the DSPRO1 course information. Follow it fo
 - `main` always reflects the current state of development — **do not commit directly to `main`** (except merging PRs during coaching).
 - Every deliverable gets its own branch + Pull Request.
 - The commit history must show that **all team members** contributed (unbalanced histories affect individual grading).
-- Coaches are always added as **reviewers**.
+- Coaches are added as **reviewers only when a deliverable PR is opened**, not on every push. Pushes on your own branch are just working history.
 - Coaches GitHub usernames: `curdon`, `lnazarenko`, `dmousadakos`.
 
 ## Steps
