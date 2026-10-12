@@ -18,6 +18,8 @@
 
 > ⚠️ **Deliverable - 15.10.2026:** Define a project name.
 
+**Untapped Sun – Forecasting Solar Generation in Lucerne**
+
 ### Pitch
 
 > ⚠️ **Deliverable - 15.10.2026:** Write a short pitch.
