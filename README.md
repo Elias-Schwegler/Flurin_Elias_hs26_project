@@ -18,11 +18,15 @@
 
 > ⚠️ **Deliverable - 15.10.2026:** Define a project name.
 
+**Untapped Sun – Forecasting Solar Generation in Lucerne**
+
 ### Pitch
 
 > ⚠️ **Deliverable - 15.10.2026:** Write a short pitch.
 
 *Write a 3 to 5 sentence pitch using [this](https://www.linkedin.com/posts/maabrahams_how-to-make-a-compelling-quick-pitch-activity-7179128237782970369-Qa6o/) as a guideline.*
+
+**What if you could** build a complete picture of solar power in Canton Lucerne from open data alone? **So that** planners and grid operators can see how fast the region's PV fleet has grown (17,205 plants, 647 MW), estimate how much it produces under different weather and seasons, and how much roof and facade potential remains, which helps raise the share of renewable energy. **For example,** we combine the SFOE plant register (capacity, start date, tilt and orientation), MeteoSwiss radiation and temperature from station Luzern, and hourly Swiss solar generation from Energy-Charts into one cleaned, hourly dataset. **And that's not all:** this dataset lets us explore seasonal patterns, such as the winter share, and test how well a simple weather-based forecast works.
 
 ---
 
