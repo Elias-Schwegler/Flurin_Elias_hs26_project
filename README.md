@@ -44,6 +44,15 @@
 
 *Which goals are you aiming for? Define 2 to 4 goals. Goals should follow the [SMART](https://www.atlassian.com/blog/productivity/how-to-write-smart-goals) definition, with a focus on measurability.*
 
+| # | Goal | Measured by | Due |
+|---|---|---|---|
+| G1 | Build one cleaned, documented hourly dataset for 2019–2025 that combines Swiss solar generation (Energy-Charts), installed PV capacity for Switzerland and Canton Lucerne (SFOE plant register) and global radiation from four MeteoSwiss stations in Canton Lucerne plus Pilatus. | Coverage ≥ 99 % of hours after cleaning; every cleaning step (time-stamp alignment, removal of erroneous days and values) documented in the notebook | 12.11.2026 |
+| G2 | Quantify how strongly solar generation follows the weather and how much of Lucerne's suitable roof potential is still unused. | Pearson correlation between hourly capacity factor and irradiation, reported per season; effect of fog and snow quantified; unused roof potential reported for all 79 municipalities of Canton Lucerne | 12.11.2026 |
+| G3 | Build a day-ahead SARIMAX forecast of hourly solar generation that only uses information available the day before (archived weather forecasts), and translate it to Lucerne via its installed capacity. | Test year 2025: mean absolute error (MAE) at least 10 % lower than a simple baseline (radiation forecast × monthly factor) and lower than seasonal-naive (same hour of the previous day); RMSE reported; Lucerne estimate validated against measured cantonal feed-in data (Pearson r ≥ 0.95) | 03.12.2026 |
+| G4 | *Stretch:* compare the pretrained time-series model TimesFM with SARIMAX on identical test weeks of 2025. | MAE, RMSE and runtime of both models; short verdict on whether the extra compute pays off | 10.12.2026 |
+
+*The dashboard (final product) presents the results of G2–G4.*
+
 ---
 
 # 2. Data Understanding
