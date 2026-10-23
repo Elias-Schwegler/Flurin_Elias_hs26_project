@@ -38,12 +38,7 @@
 
 *Describe the problem that should be solved in two sentences.*
 
-Canton Lucerne's solar capacity doubled from 326 MW at the end of 2022 to 652 MW in October 2026, yet less
-than a fifth of its suitable roof potential is used, and its output fluctuates strongly with weather and season, which
-makes grid planning and the shifting of flexible loads (heat pumps, EV charging, batteries) harder. We investigate
-how well hourly solar generation in Lucerne can be estimated and forecast one day ahead from open data, and
-whether a pretrained time-series model (TimesFM) adds accuracy over an explainable SARIMAX model that justifies
-its extra compute.
+Canton Lucerne’s solar capacity doubled from 326 MW at the end of 2022 to 652 MW in October 2026, and its output fluctuates strongly with weather and season, which makes grid planning and the shifting of flexible loads (heat pumps, EV charging, batteries) harder. We investigate how well hourly solar generation in Lucerne can be forecast one day ahead from open data with a SARIMAX model.
 
 ## Goals
 
