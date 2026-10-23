@@ -38,11 +38,21 @@
 
 *Describe the problem that should be solved in two sentences.*
 
+Canton Lucerne’s solar capacity doubled from 326 MW at the end of 2022 to 652 MW in October 2026, and its output fluctuates strongly with weather and season, which makes grid planning and the shifting of flexible loads (heat pumps, EV charging, batteries) harder. We investigate how well hourly solar generation in Lucerne can be forecast one day ahead from open data with a SARIMAX model.
+
 ## Goals
 
 > ⚠️ **Deliverable - 22.10.2026:** Formulate goals for you project.
 
 *Which goals are you aiming for? Define 2 to 4 goals. Goals should follow the [SMART](https://www.atlassian.com/blog/productivity/how-to-write-smart-goals) definition, with a focus on measurability.*
+
+| # | Goal | Measured by | Due |
+|---|---|---|---|
+| G1 | Build one cleaned, documented hourly dataset for 2019–2025 that combines Swiss solar generation (Energy-Charts), installed PV capacity for Switzerland and Canton Lucerne (SFOE plant register), global radiation from four MeteoSwiss stations in Canton Lucerne plus Pilatus, and archived day-ahead weather forecasts for Lucerne (Open-Meteo Previous Runs API, test year 2025). | Coverage ≥ 99 % of hours after cleaning; every cleaning step (time-stamp alignment, removal of erroneous days and values) documented in the notebook | 12.11.2026 |
+| G2 | Quantify how strongly solar generation follows the weather. | Pearson correlation between hourly capacity factor and irradiation, reported per season; effect of fog and snow quantified; daily and seasonal profiles shown | 12.11.2026 |
+| G3 | Build a day-ahead SARIMAX forecast of hourly solar generation that only uses information available the day before (archived weather forecasts), and translate it to Lucerne via its installed capacity. | Test year 2025: mean absolute error (MAE) at least 10 % lower than a simple baseline (radiation forecast × monthly factor) and lower than seasonal-naive (same hour of the previous day); RMSE reported; Lucerne estimate validated against measured cantonal grid feed-in (Pronovo load profiles per canton; Pearson r ≥ 0.95) | 03.12.2026 |
+
+*The dashboard (final product) presents the results of G2 and G3.*
 
 ---
 
