@@ -17,3 +17,7 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Raw files stay out of Git: use the download_data.py next to each notebook
+notebooks/meteoswiss/data/*.csv
+notebooks/energy_charts/data/*.json
