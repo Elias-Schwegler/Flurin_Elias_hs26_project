@@ -21,3 +21,7 @@ Thumbs.db
 # Raw files stay out of Git: use the download_data.py next to each notebook
 notebooks/meteoswiss/data/*.csv
 notebooks/energy_charts/data/*.json
+notebooks/bfe_register/data/*.csv
+notebooks/bfe_register/data/*.zip
+notebooks/bfe_register/data/*.json
+notebooks/open_meteo/data/*.json
