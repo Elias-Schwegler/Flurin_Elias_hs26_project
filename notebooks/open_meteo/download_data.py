@@ -25,6 +25,8 @@ for location, (latitude, longitude) in LOCATIONS.items():
                   "start_date": START, "end_date": END, "timezone": "GMT"}
         response = requests.get(URL, params=params, timeout=300)
         response.raise_for_status()
+        if not response.content.startswith(b"{"):  # when busy, the API can answer 200 with an error text
+            raise RuntimeError(f"no data for {location}, run the script again: {response.text[:80]}")
         target.write_bytes(response.content)
         print("downloaded", target.name)
         time.sleep(2)
