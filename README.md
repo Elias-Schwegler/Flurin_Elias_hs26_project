@@ -66,9 +66,12 @@ Canton Lucerne’s solar capacity doubled from 326 MW at the end of 2022 to 652 
 
 | Data source | Description |
 |-------------|-------------|
-|             |             |
-|             |             |
+| [Energy-Charts](https://api.energy-charts.info) (Fraunhofer ISE), public net generation of Switzerland | **Target.** Hourly Swiss solar generation in MW since 2015. National, extrapolated from reference plants and scaled to the official SFOE totals. CC BY 4.0, "energy-charts.info". EDA: [energy_charts_eda.ipynb](notebooks/energy_charts/energy_charts_eda.ipynb) |
+| [MeteoSwiss SwissMetNet](https://opendatadocs.meteoswiss.ch/a-data-groundbased/a1-automatic-weather-stations) | **Measured weather.** Hourly global radiation, sunshine, temperature and snow depth at Luzern, Mosen, Schüpfheim and Egolzwil in Canton Lucerne, plus Pilatus (2,105 m, usually above the fog). CC BY 4.0, "Source: MeteoSwiss". EDA: [meteoswiss_eda.ipynb](notebooks/meteoswiss/meteoswiss_eda.ipynb) |
+| [SFOE plant register](https://opendata.swiss/de/dataset/elektrizitatsproduktionsanlagen), with the official capacity from Energy-Charts | **Installed capacity.** Every PV plant in operation with power, start date and canton. Gives the daily capacity of Switzerland and Lucerne, scaled to the official capacity per year. Source: SFOE, opendata.swiss. EDA: [bfe_register_eda.ipynb](notebooks/bfe_register/bfe_register_eda.ipynb) |
+| [Open-Meteo Previous Runs API](https://open-meteo.com/en/docs/previous-runs-api) | **Day-ahead forecast.** Archived ICON-D2 forecasts of radiation, temperature and cloud cover, made one day before, at the four Lucerne stations, 2024–2025. CC BY 4.0, "Open-Meteo.com", free for non-commercial use. EDA: [open_meteo_eda.ipynb](notebooks/open_meteo/open_meteo_eda.ipynb) |
 
+All sources are open data. The raw files are not in the repository: every notebook folder has a `download_data.py` that fetches them.
 
 ## Exploratory Data Analysis
 
@@ -76,19 +79,45 @@ Canton Lucerne’s solar capacity doubled from 326 MW at the end of 2022 to 652 
 
 *A hands-on definition of EDA can be found [here](https://www.geeksforgeeks.org/data-analysis/what-is-exploratory-data-analysis/). The implementation of the EDA should be contained in a dedicated notebook.*
 
-- Notebook to run the EDA: [01_data_understanding.ipynb](notebooks/01_data_understanding.ipynb)
+- Notebook to run the EDA: [combined_eda.ipynb](notebooks/combined/combined_eda.ipynb). It joins the four sources into one hourly table for 2019–2025 (`data/processed/hourly_dataset.csv`, 61,368 hours). Each source is checked first in its own notebook (table above).
+- To reproduce: `pip install -r requirements.txt`, run `python download_data.py` in the four folders `notebooks/energy_charts`, `meteoswiss`, `bfe_register` and `open_meteo`, then the notebooks.
+- Every section of the notebooks starts with a question and ends with *Finding → Consequence*. Every notebook ends with a decision log: each issue, whether it is an error or a characteristic of the data, and what we did.
+- All time stamps are converted to fixed CET (UTC+1, no clock changes); each stamp marks the start of the hour.
 
 ### Data Quality
 
 *Short description of the results from the EDA with respect to data quality issues, such as coverage, data types, missing values, etc.*
 
+- **Coverage:** after cleaning, 99.57 % of the 61,368 hours of 2019–2025 are complete (G1: at least 99 %). The 266 missing hours are 11 error days in 2019 and two impossible night values (415 MW at midnight in September 2022). Nothing is filled.
+- **Gaps with a cause:** three outages at Mosen (167 hours; the station mean uses the other three), snow depth only measured since November 2023, ICON-D2 forecasts only since 19 January 2024.
+- **Disguised missing values:** zeros in the solar series on sunny days. 2018 fits the weather far worse than every other year, so we leave it out instead of rebuilding it from radiation; 2015 contains only 19 % of the official total. Real zeros also exist: on 25 winter days snow covered the panels, these days are kept and flagged (`is_snow_cover_day`).
+- **Consistency checks:** the annual solar sums match the official SFOE statistics. The register matches the official capacity until 2020 but covers only about 91 % from 2022 on, so we scale it to the official capacity per year.
+- **Time stamps:** the sources come in UTC with different conventions (start or end of the hour, mean of the preceding hour). After the conversion, solar and radiation correlate best at zero shift.
+- **Sensor errors:** a night offset at Egolzwil (night hours set to 0), "snow" in summer at Schüpfheim (set to missing from May to September), plant parts with 1,000 times too much power in `PlantDetail` (not used).
+
 ### Insights
 
 *List insights from the EDA with respect to the problem statement. Is the data suitable for reaching your goals?*
 
+- **Solar follows the weather (G2 reached):** the hourly capacity factor correlates with the Lucerne radiation at r = 0.98. In daylight only, r is 0.91 in winter and 0.96 in summer. Weighting the stations by installed capacity does not beat the simple mean.
+- **Winter is the weak spot:** on fog days (Pilatus far brighter than Lucerne, 15 % of the winter days) Swiss solar is about 27 % higher than the Lucerne radiation explains. Snow on the panels pushes 25 winter days below 35 % of the expected output (1.7 % of the energy from November to February).
+- **The day-ahead forecast is a good input, except in fog:** the ICON-D2 radiation correlates with the measurement at r = 0.97 per hour, but on 42 fog days it forecasts 86 % too much. The daily error is 8–9 % from April to August, 36 % in October and 47 % in December.
+- **Baselines for G3** (test year 2025, MAE in % of the mean): a constant is off by 124 %, the same hour of the previous day by 27.6 %, the radiation forecast × monthly factor by 16.3 %. The G3 target is therefore an MAE of at most 14.7 %. Even the measured radiation reaches only 16.0 % with the same simple factor, so the model has to gain from the time structure.
+- **Leakage:** only the `forecast_*` columns, past values, calendar features and the capacity of the previous day may be model inputs. Measured weather is known only afterwards.
+- **Is the data suitable?** Yes for G1 and G2, partly for G3: the forecasts cover the test year, but only one earlier year (2024) is available for training. The target is national while the weather comes from Canton Lucerne.
+
 ### Visualizations
 
 The entire set of visualizations can be found in `figures/eda`.
+
+![Daily Swiss solar generation on the same dates in 2018 and 2019](figures/eda/energy_charts_suspicious_days_2018_vs_2019.png)
+*Data quality: on the same dates, 2018 shows days with almost no solar although the sun was shining (shaded). We leave 2018 out.*
+
+![Swiss solar generation and Lucerne radiation in one week of June and December](figures/eda/combined_overlay_weeks.png)
+*G2: Swiss solar (blue) and the mean radiation of the four Lucerne stations (orange), each as share of the week's maximum, almost overlap in summer and in winter.*
+
+![Daily error of the radiation forecast per month in 2025](figures/eda/combined_forecast_error_per_month.png)
+*G3: the day-ahead radiation forecast is off by only 8–9 % per day from April to August, but by 36 % in October and 47 % in December. On fog days it forecasts 86 % too much radiation.*
 
 ---
 
