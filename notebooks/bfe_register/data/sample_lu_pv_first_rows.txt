@@ -1,0 +1,21 @@
+xtf_id,PostCode,Municipality,Canton,BeginningOfOperation,InitialPower,TotalPower,MainCategory,SubCategory,PlantCategory,_x,_y
+8254,6024,Hildisrieden,LU,1998-06-15,3.5,3.5,maincat_2,subcat_2,,2659386.052,1222128.772
+8277,6210,Sursee,LU,1990-10-12,2.6,2.6,maincat_2,subcat_2,,2650474.443,1224695.431
+8378,6043,Adligenswil,LU,1999-09-30,4,4,maincat_2,subcat_2,,2671554.861,1213937.94
+8500,6020,Emmenbrücke,LU,1999-04-01,1.5,1.5,maincat_2,subcat_2,,2661949.768,1214120.532
+8503,6047,Kastanienbaum,LU,1998-12-23,5.1,5.1,maincat_2,subcat_2,,2668134.736,1207451.554
+8506,6033,Buchrain,LU,1996-07-01,2.3,2.3,maincat_2,subcat_2,,2669477.317,1216410.731
+8512,6045,Meggen,LU,1991-06-07,6.1,6.1,maincat_2,subcat_2,,2672013.31,1212637.482
+8514,6214,Schenkon,LU,1998-03-16,8.8,8.8,maincat_2,subcat_2,,2651941.514,1225365.762
+8521,6020,Emmenbrücke,LU,1994-06-22,10.1,10.1,maincat_2,subcat_2,,2664285.018,1214344.305
+8618,6105,Schachen LU,LU,1996-06-01,4.06,4.06,maincat_2,subcat_2,,2652246.628,1207612.036
+8619,6206,Neuenkirch,LU,1990-09-30,3,3,maincat_2,subcat_2,,2659124.431,1216615.133
+8622,6215,Beromünster,LU,1992-05-25,3,3,maincat_2,subcat_2,,2656551.127,1228476.262
+8642,6043,Adligenswil,LU,1997-07-09,6.5,6.5,maincat_2,subcat_2,,2671473.503,1214410.696
+8732,6015,Luzern,LU,2005-06-20,4,4,maincat_2,subcat_2,,2663442.661,1213307.479
+8735,6043,Adligenswil,LU,2003-10-01,0.3,0.3,maincat_2,subcat_2,,2669490.58,1212587.764
+9238,6023,Rothenburg,LU,1991-04-14,3,3,maincat_2,subcat_2,,2664006.179,1216667.866
+9415,6003,Luzern,LU,2007-09-13,30.2,30.2,maincat_2,subcat_2,plantcat_8,2665933.156,1211270.424
+9609,6102,Malters,LU,2008-08-15,163.1,163.1,maincat_2,subcat_2,plantcat_8,2656712,1211307
+9759,6017,Ruswil,LU,2008-08-11,159.44,160.09,maincat_2,subcat_2,plantcat_8,2653349,1217561
+9789,6017,Ruswil,LU,2007-09-05,2.45,2.45,maincat_2,subcat_2,plantcat_8,2651282.402,1215289.458
