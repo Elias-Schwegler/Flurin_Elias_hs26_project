@@ -126,8 +126,12 @@ The entire set of visualizations can be found in `figures/eda` (combined noteboo
 # 3. Data Preparation
 *Data preparation (also known as feature engineering) consists of steps such as cleaning, filtering, joining, [aggregating](https://www.geeksforgeeks.org/python/grouping-and-aggregating-with-pandas/), [normalizing](https://www.geeksforgeeks.org/python/data-normalization-with-pandas/), and transforming the data. The goal is to have one dataset that contains all features and is ready to be used in the follow-up data modeling. All data preparation is contained in one notebook that may use modular code. Data preparation is not a deliverable but goes hand in hand with the follow-up step of data modeling.*
 
-- Notebook to run the data preparation: [02_data_preparation.ipynb](notebooks/02_data_preparation.ipynb)
+- Notebook to run the data preparation: [02_data_preparation.ipynb](notebooks/02_data_preparation.ipynb). Input: the cleaned hourly table of the EDA (`data/processed/hourly_dataset.csv`, section 2). Output: `data/processed/modeling_dataset.csv`, 61,368 hours × 45 columns with the features, the model inputs and the period of every hour.
 - Reusable, modular code is outsourced to separate `.py` files: [src/data_preparation.py](src/data_preparation.py)
+- **Rule for every input:** a value for an hour of day D only uses what is known at the end of day D-1 (forecasts made the day before, the calendar and the position of the sun, values measured on D-1 or earlier). A leakage test checks this on every run: all measured values of one day are overwritten with random numbers, and the inputs of that day must stay the same.
+- **Radiation input:** archived day-ahead forecasts only exist from 20.1.2024. For training, the measured radiation of 2019–2023 stands in for the forecast; validation and test only use real forecasts.
+- **Split by time, not at random:** training 2019–2023, validation 20.1.–31.12.2024 (to choose the model), test 2025 (used once). The final model is trained on 2019–2024.
+- Nothing is filled in: hours with a missing input (120 daylight hours) are left out of the fit.
 
 ## Features
 
@@ -135,9 +139,28 @@ The entire set of visualizations can be found in `figures/eda` (combined noteboo
 
 | Feature | Description |
 |---------|-------------|
-|         |             |
-|         |             |
-|         |             |
+| `target` | Capacity factor = Swiss solar generation ÷ installed capacity (0–1), only while the sun is up. Night hours are not modelled; the forecast is 0 there. |
+| `radiation_input` | Global radiation in W/m² for Canton Lucerne, the four stations weighted by the PV capacity closest to them: ICON-D2 forecast made the day before from 20.1.2024, measured radiation before (stand-in for training). |
+| `sin_elevation` | Sine of the sun's elevation in the middle of the hour (astronomy). Per kW/m² of radiation, a low sun gives far less output (0.46) than a high sun (0.78). |
+| `clear_sky` | Radiation of a cloudless sky in W/m² (Haurwitz model); output that does not scale with the forecast, such as diffuse light. |
+| `season_cos`, `season_sin` | Day of the year on a circle: cos and sin of 2π · day / 365.25. The conversion of radiation changes with the season (temperature, snow, low sun). |
+| `yday_production_index` | Yesterday's mean capacity factor ÷ yesterday's mean clear-sky radiation: how well sunlight was converted yesterday (snow on the panels, haze). |
+| `yday_fog` | 1 if yesterday was a fog day (Pilatus more than twice as bright as Lucerne). Fog comes in periods, and the weather forecast misses it (section 2, Insights). |
+| `yday_cold` | 1 if yesterday's mean temperature in Lucerne was below 1 °C (November–March): snow on the panels lasts several days. |
+| `period` | Training, warm-up (1.–19.1.2024, no forecast yet), validation or test. |
+
+**Model inputs.** SARIMAX is linear, so the features enter multiplied with the radiation input r (in kW/m²). This lets the conversion of radiation into power follow the sun, the season and yesterday's signals. All eleven are known the day before.
+
+| Input | Formula | Why |
+|-------|---------|-----|
+| `rad` | r | main driver |
+| `rad_elev` | r × `sin_elevation` | more output per radiation when the sun is high |
+| `rad_season_cos`, `rad_season_sin` | r × `season_cos`, r × `season_sin` | conversion changes with the season |
+| `rad_squared` | r² | saturation at high radiation (heat, inverter limits) |
+| `clear`, `clear_season_cos` | `clear_sky` in kW/m², also × `season_cos` | output that does not scale with r |
+| `rad_yday_index` | r × `yday_production_index` | yesterday's conversion (snow, haze) |
+| `rad_yday_fog`, `clear_yday_fog` | r × `yday_fog`, `clear_sky` × `yday_fog` | after a fog day the forecast radiation is less reliable |
+| `rad_yday_cold` | r × `yday_cold` | snow on the panels lasts |
 
 ---
 
@@ -148,11 +171,30 @@ The entire set of visualizations can be found in `figures/eda` (combined noteboo
 ## Concept
 *Describe the data modeling approach in a few sentences. Which major tasks have to be performed? Which types of models are used (why)? What are the results? The goal of DSPRO1 is not to implement complex ML algorithms but to tell a coherent data story. A dashboard visualisation or a classical statistical analysis cab be sufficient in terms of data modeling.*
 
+We forecast the hourly capacity factor of Swiss solar power one day ahead with **SARIMAX**, a classical statistical model: a linear regression on the eleven inputs of section 3 whose errors follow a seasonal ARIMA process with a period of 24 hours. We chose it because it is interpretable and fits the structure of the data. The daily and seasonal cycle are fixed by the position of the sun and enter through the inputs. The persistence of the weather from one day to the next enters through the error model. Every coefficient can be checked for physical sense.
+
+The major tasks are shown in the diagram below. First, we build inputs that are known the day before and test them for leakage. Then we identify the error structure with stationarity tests (ADF, KPSS) and the autocorrelation (ACF, PACF) of the regression residual. Next, we choose the inputs and the error model by their **day-ahead** error on the validation year 2024: every day is forecast at midnight with the archived weather forecast. Finally, we fit the model on 2019–2024 and check its coefficients and residuals.
+
+**Results:** the chosen model is **SARIMAX(0,0,0)(1,0,0)₂₄**: no differencing, one seasonal AR term, Φ₁ = 0.27. About a quarter of yesterday's error at the same hour carries over to today. On the validation year 2024, its hourly MAE is 16.6 % against 20.8 % for reference (b), a skill of 20 % (error models fitted on 2022–2023). The AIC preferred an extra AR term for the hour before, but that model had the worst day-ahead error (21.9 %), because the AIC rewards forecasts one hour ahead. We therefore select by the error of the real task. The coefficients are physically plausible: more output per radiation when the sun is high, less after a cold winter day. In December, however, the model assumes too high a conversion (0.75 instead of 0.58). Its own prediction intervals are not reliable, because the spread of the errors changes with the season. The test on 2025 follows in section 5.
+
 ## Implementation
 *Make a reference to the notebook and scripts used for performing the data modeling. Sketch a diagram that contains all major tasks and notes for the corresponding implementation.*
 
-- Notebook to run the data modeling: [03_modeling.ipynb](notebooks/03_modeling.ipynb)
+- Notebook to run the data modeling: [03_modeling.ipynb](notebooks/03_modeling.ipynb). The first run takes about 5 minutes; the fitted parameters are then cached in `data/processed/models/`.
 - Reusable, modular code is outsourced to separate `.py` files: [src/data_modeling.py](src/data_modeling.py)
+
+```mermaid
+flowchart TD
+    A["<b>Cleaned hourly table</b>, 2019–2025<br/>combined_eda.ipynb → hourly_dataset.csv"]
+    B["<b>Features known the day before</b><br/>sun position, clear sky, season, yesterday's fog, cold and yield<br/>02_data_preparation.ipynb · add_features()"]
+    C["<b>Model inputs and leakage test</b><br/>11 inputs = radiation × feature, split by time<br/>build_modeling_dataset() → modeling_dataset.csv"]
+    D["<b>Identification</b> on 2019–2023<br/>ADF / KPSS → no differencing · ACF / PACF → AR at lag 24<br/>03_modeling.ipynb, Part A"]
+    E["<b>Selection on the validation year 2024</b><br/>inputs and error model by the day-ahead MAE, not by AIC<br/>fit_or_load() · day_ahead_forecast() · 03_modeling.ipynb, Part B"]
+    F["<b>Final model</b>, fitted on 2019–2024<br/>SARIMAX(0,0,0)(1,0,0)24 · coefficients · residual diagnostics<br/>03_modeling.ipynb, Part C"]
+    G["<b>Test year 2025</b>, used once · translation to Lucerne<br/>04_evaluation.ipynb, section 5"]
+    A --> B --> C --> D --> E --> F --> G
+    style G stroke-dasharray: 5 5
+```
 
 
 # 5. Evaluation
