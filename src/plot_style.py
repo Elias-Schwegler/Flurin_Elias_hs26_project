@@ -1,9 +1,9 @@
-"""One plot style for all EDA notebooks: colours, font sizes and where figures are saved.
+"""One plot style for all notebooks: colours, font sizes and where figures are saved.
 
-Use it in a notebook (notebooks run in notebooks/<folder>/):
+Use it in a notebook (EDA notebooks run in notebooks/<folder>/, so they use "../.."):
 
     import sys
-    sys.path.insert(0, "../..")
+    sys.path.insert(0, "..")
     from src.plot_style import BLUE, ORANGE, GREY, save_figure
 
 Importing the module sets the matplotlib style. Every figure is WIDTH inches wide,
@@ -33,8 +33,13 @@ plt.rcParams.update({
 FIGURES = Path(__file__).resolve().parents[1] / "figures" / "eda"
 
 
-def save_figure(fig, name, details=False):
-    """Save to figures/eda/, or to figures/eda/sources/ for the detail figures of the source notebooks."""
-    folder = FIGURES / "sources" if details else FIGURES
+def save_figure(fig, name, details=False, phase="eda"):
+    """Save to figures/<phase>/ (eda, modeling or eval).
+
+    details=True: figures/eda/sources/, for the detail figures of the source notebooks.
+    """
+    folder = FIGURES.parent / phase
+    if details:
+        folder = folder / "sources"
     folder.mkdir(parents=True, exist_ok=True)
     fig.savefig(folder / f"{name}.png")
